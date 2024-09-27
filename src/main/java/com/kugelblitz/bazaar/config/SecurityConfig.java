@@ -29,7 +29,7 @@ public class SecurityConfig {
   public SecurityFilterChain configure(HttpSecurity http) throws Exception {
     http.authorizeHttpRequests(
             auth ->
-                auth.requestMatchers("/login", "/register", "/api")
+                auth.requestMatchers("/login", "/register", "/registerUser", "/api/**")
                     .permitAll() // Allows access to the login and register pages to all users
                     .anyRequest()
                     .authenticated()) // Other requests need Authentication
