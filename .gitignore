@@ -31,3 +31,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Ignore FETCH_HEAD
+FETCH_HEAD
+
+### Ignore logs
+*.log
