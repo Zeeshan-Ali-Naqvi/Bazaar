@@ -77,7 +77,8 @@ public class AuthController {
     Optional<Role> customerRole = roleRepository.findByName("ROLE_CUSTOMER");
     customerRole.ifPresent(role -> user.setRoles(Collections.singleton(role)));
     userRepository.save(user);
-    return "redirect:/login";
+    model.addAttribute("successRegister", "Registration Successful");
+    return "register";
   }
 
   @GetMapping("/logout")
