@@ -4,12 +4,14 @@ import com.kugelblitz.bazaar.entity.Role;
 import com.kugelblitz.bazaar.entity.User;
 import com.kugelblitz.bazaar.repository.RoleRepository;
 import com.kugelblitz.bazaar.repository.UserRepository;
+import com.kugelblitz.bazaar.util.ValidatorUtil;
 import java.util.Collections;
 import java.util.Optional;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,7 +50,29 @@ public class AuthController {
   }
 
   @PostMapping("/registerUser")
-  public String register(@ModelAttribute("user") User user) {
+  public String register(
+      @ModelAttribute("user") User user, BindingResult bindingResult, Model model) {
+    if (ValidatorUtil.isNotValidPattern(user.getPassword(), ValidatorUtil.PASSWORD_PATTERN)) {
+      bindingResult.rejectValue(
+          "password",
+          "error.password",
+          "Invalid password format! Password must have at least 8 characters, one uppercase, one lowercase, one digit, and one special character.");
+    }
+
+    if (ValidatorUtil.isNotValidPattern(user.getEmail(), ValidatorUtil.EMAIL_PATTERN)) {
+      bindingResult.rejectValue(
+          "email",
+          "error.email",
+          "Invalid format for email! Email should be in the format abc@xyz.com");
+    }
+
+    if (userRepository.findByUsername(user.getUsername()).isPresent()) {
+      bindingResult.rejectValue("username", "error.username", "Username is already in use");
+    }
+
+    if (bindingResult.hasErrors()) {
+      return "register";
+    }
     user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
     Optional<Role> customerRole = roleRepository.findByName("ROLE_CUSTOMER");
     customerRole.ifPresent(role -> user.setRoles(Collections.singleton(role)));
